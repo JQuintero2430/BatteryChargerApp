@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Battery charger</string>
+    <string name="title">Super Eco Monitor to Solar Battery Charger</string>
+    <string name="charge_battery">Charge Battery</string>
+    <string name="discharge_battery">Discharge Battery</string>
+    <string name="battery_level">Battery Level: 0%</string>
 </resources>
