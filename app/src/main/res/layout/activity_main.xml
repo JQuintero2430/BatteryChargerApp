@@ -35,7 +35,7 @@
          android:layout_height="wrap_content"
          android:textSize="24sp"
          android:textColor="#333333"
-         android:text="@string/battery_level"
+         android:text="Battery Level: 0%"
          />
 
      <ProgressBar
