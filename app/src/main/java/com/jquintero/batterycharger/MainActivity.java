@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     int batteryLevel = 0;
-    boolean isCharging = false;
+    volatile boolean isCharging = false;
     TextView batteryLevelTextView;
     ProgressBar batteryProgressBar;
     Button btnChargeBattery, btnDischargeBattery;
@@ -24,53 +24,23 @@ public class MainActivity extends AppCompatActivity {
         btnChargeBattery = findViewById(R.id.btnChargeBattery);
         btnDischargeBattery = findViewById(R.id.btnDischargeBattery);
 
-        btnChargeBattery.setOnClickListener(v -> {
-            startSolarCharging();
-        });
-
-        btnDischargeBattery.setOnClickListener(v -> {
-            startBatteryDischarging();
-        });
-
+        btnChargeBattery.setOnClickListener(v -> controlBatteryCharging(5, 100));
+        btnDischargeBattery.setOnClickListener(v -> controlBatteryCharging(-5, 0));
     }
-    private void startSolarCharging() {
-        boolean isCharging = true;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (isCharging && batteryLevel < 100) {
-                    batteryLevel += 5;
-                    if (batteryLevel > 100) {
-                        batteryLevel = 100;
-                    }
-                    updateBatteryLevel();
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+    private void controlBatteryCharging(int delta, int limit) {
+        isCharging = delta > 0;
+        new Thread(() -> {
+            while ((isCharging ? batteryLevel < limit : batteryLevel > limit) && (isCharging == (delta > 0))) {
+                batteryLevel += delta;
+                if (delta > 0 && batteryLevel > limit || delta < 0 && batteryLevel < limit) {
+                    batteryLevel = limit;
                 }
-            }
-
-        }).start();
-    }
-
-    private void startBatteryDischarging() {
-        boolean isCharging = true;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (isCharging && batteryLevel > 0) {
-                    batteryLevel -= 5;
-                    if (batteryLevel < 0) {
-                        batteryLevel = 0;
-                    }
-                    updateBatteryLevel();
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                runOnUiThread(this::updateBatteryLevel); // Update UI on the UI thread
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }).start();
